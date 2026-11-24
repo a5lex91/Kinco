@@ -2,99 +2,90 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#1e3a8a">
-<title>Kinco ЧПУ — Расчет пробивки</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<title>Kinco ЧПУ • Пробивка ЛСТК</title>
 <style>
   :root {
     --primary: #1e3a8a;
-    --primary-light: #eff6ff;
-    --accent: #2563eb;
+    --primary-light: #2563eb;
     --bg: #f1f5f9;
     --card: #ffffff;
     --border: #cbd5e1;
-    --text: #0f172a;
+    --text: #1e293b;
     --muted: #64748b;
-    --yellow: #fef9c3;
-    --yellow-border: #eab308;
+    --input-bg: #fef9c3;
+    --input-border: #eab308;
     --ok-bg: #dcfce7;
     --ok-text: #166534;
-    --ok-border: #22c55e;
+    --ok-border: #86efac;
     --err-bg: #fee2e2;
     --err-text: #991b1b;
-    --err-border: #ef4444;
+    --err-border: #fca5a5;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     background: var(--bg);
     color: var(--text);
-    padding-bottom: 130px;
+    margin: 0;
+    padding-bottom: calc(130px + env(safe-area-inset-bottom));
+    font-size: 15px;
   }
-  header {
+
+  /* Header */
+  .topbar {
     background: var(--primary);
     color: #fff;
-    padding: 12px 16px;
+    padding: calc(10px + env(safe-area-inset-top)) 14px 10px 14px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     position: sticky;
     top: 0;
-    z-index: 30;
+    z-index: 40;
     box-shadow: 0 2px 6px rgba(0,0,0,0.15);
   }
-  header h1 {
-    margin: 0;
-    font-size: 17px;
+  .topbar-title {
     font-weight: 700;
-    letter-spacing: 0.2px;
+    font-size: 16px;
+    line-height: 1.2;
   }
-  header .sub {
+  .topbar-sub {
     font-size: 11px;
     opacity: 0.85;
   }
   .btn-top {
-    background: rgba(255,255,255,0.18);
-    border: 1px solid rgba(255,255,255,0.35);
+    background: rgba(255,255,255,0.16);
+    border: 1px solid rgba(255,255,255,0.3);
     color: #fff;
-    padding: 6px 11px;
+    padding: 6px 10px;
     border-radius: 8px;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
     cursor: pointer;
   }
-  .btn-top:active { background: rgba(255,255,255,0.3); }
-
-  .container {
-    max-width: 820px;
-    margin: 0 auto;
-    padding: 12px;
-  }
 
   /* Status Banner */
-  .status-banner {
+  .status-box {
+    margin: 10px 12px;
+    padding: 10px 12px;
     border-radius: 12px;
-    padding: 12px 14px;
-    margin-bottom: 12px;
-    border: 2px solid;
-    transition: all 0.15s ease;
-  }
-  .status-banner.ok {
+    border: 1.5px solid var(--ok-border);
     background: var(--ok-bg);
-    border-color: var(--ok-border);
     color: var(--ok-text);
   }
-  .status-banner.err {
-    background: var(--err-bg);
+  .status-box.error {
     border-color: var(--err-border);
+    background: var(--err-bg);
     color: var(--err-text);
   }
-  .status-title {
-    font-size: 15px;
+  .status-main {
     font-weight: 800;
+    font-size: 14px;
     margin-bottom: 6px;
     display: flex;
     align-items: center;
@@ -102,332 +93,263 @@
   }
   .status-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr 1fr;
     gap: 6px;
-    font-size: 12.5px;
+    font-size: 12px;
   }
   .status-item {
     background: rgba(255,255,255,0.65);
     padding: 5px 8px;
     border-radius: 6px;
+    color: var(--text);
   }
-  .status-item span { display: block; font-size: 10.5px; opacity: 0.8; }
-  .status-item strong { font-size: 13px; }
+  .status-item b { display: block; font-size: 13px; }
 
   /* Card */
   .card {
     background: var(--card);
+    margin: 10px 12px;
+    padding: 12px;
     border-radius: 12px;
-    padding: 14px;
-    margin-bottom: 12px;
     border: 1px solid var(--border);
     box-shadow: 0 1px 3px rgba(0,0,0,0.04);
   }
   .card-title {
-    font-size: 14px;
-    font-weight: 700;
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
     color: var(--primary);
     margin: 0 0 10px 0;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    letter-spacing: 0.3px;
   }
 
-  /* Meta inputs */
+  /* Form Grid */
   .meta-grid {
     display: grid;
     grid-template-columns: 1.2fr 1fr 0.8fr;
     gap: 8px;
+    margin-bottom: 10px;
   }
   .field label {
     display: block;
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--muted);
-    margin-bottom: 4px;
+    margin-bottom: 3px;
   }
-  .field input, .field select {
+  input[type="text"], input[type="number"], select {
     width: 100%;
-    padding: 9px 10px;
+    padding: 8px 8px;
+    border-radius: 8px;
+    border: 1.5px solid var(--input-border);
+    background: var(--input-bg);
     font-size: 15px;
     font-weight: 700;
-    border: 1.5px solid var(--yellow-border);
-    background: var(--yellow);
-    border-radius: 8px;
-    color: #1e3a8a;
-    outline: none;
+    color: var(--text);
+    text-align: center;
   }
-  .field input:focus, .field select:focus {
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
-    border-color: var(--accent);
+  input[type="text"] { text-align: left; }
+  input:focus, select:focus {
+    outline: none;
+    border-color: var(--primary-light);
+    background: #fff;
   }
 
-  /* Hint box */
-  .hint-box {
-    background: #fefce8;
-    border: 1px solid #fde047;
-    color: #854d0e;
-    font-size: 12px;
-    padding: 8px 10px;
+  .hint {
+    font-size: 11.5px;
+    color: var(--muted);
+    background: #f8fafc;
+    padding: 7px 9px;
     border-radius: 8px;
+    border-left: 3px solid var(--primary-light);
     margin-bottom: 10px;
     line-height: 1.35;
   }
 
-  /* Tabs bar for marks */
-  .marks-bar-wrap {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    margin-bottom: 12px;
-    flex-wrap: wrap;
-  }
-  .marks-tabs {
+  /* Tabs Bar for Marks */
+  .tabs-strip {
     display: flex;
     align-items: center;
     gap: 6px;
     overflow-x: auto;
-    padding-bottom: 4px;
-    flex: 1;
-    scrollbar-width: thin;
+    padding-bottom: 6px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid #e2e8f0;
   }
   .mark-tab {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 7px 11px;
+    padding: 6px 10px;
     border-radius: 8px;
-    background: #e2e8f0;
-    color: #1e293b;
+    border: 1px solid var(--border);
+    background: #f8fafc;
     font-size: 13px;
     font-weight: 700;
-    border: 1.5px solid transparent;
-    cursor: pointer;
+    color: var(--text);
     white-space: nowrap;
-    user-select: none;
+    cursor: pointer;
   }
   .mark-tab.active {
-    background: var(--accent);
+    background: var(--primary-light);
     color: #fff;
-    border-color: var(--primary);
-    box-shadow: 0 2px 4px rgba(37,99,235,0.25);
+    border-color: var(--primary-light);
   }
   .mark-tab .del-tab {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 17px;
-    height: 17px;
-    border-radius: 50%;
-    font-size: 12px;
-    line-height: 1;
-    background: rgba(0,0,0,0.12);
-    color: inherit;
-  }
-  .mark-tab.active .del-tab {
-    background: rgba(255,255,255,0.25);
+    font-size: 14px;
+    opacity: 0.75;
+    padding: 0 2px;
   }
   .btn-add-mark {
-    padding: 7px 11px;
+    padding: 6px 10px;
     border-radius: 8px;
-    background: #dcfce7;
+    border: 1px dashed #16a34a;
+    background: #f0fdf4;
     color: #166534;
-    border: 1.5px solid #86efac;
     font-size: 13px;
     font-weight: 700;
-    cursor: pointer;
     white-space: nowrap;
+    cursor: pointer;
   }
   .btn-clear {
-    padding: 7px 11px;
+    padding: 6px 10px;
     border-radius: 8px;
-    background: #fee2e2;
+    border: 1px solid #fca5a5;
+    background: #fef2f2;
     color: #991b1b;
-    border: 1.5px solid #fecaca;
     font-size: 13px;
     font-weight: 700;
-    cursor: pointer;
     white-space: nowrap;
+    cursor: pointer;
   }
 
-  /* Rows table */
-  .rows-header {
+  /* Segments Table */
+  .seg-header {
     display: grid;
-    grid-template-columns: 32px 1fr 0.85fr 0.85fr 54px 32px;
+    grid-template-columns: 28px 1fr 0.8fr 0.9fr 58px 28px;
     gap: 5px;
     font-size: 11px;
     font-weight: 700;
     color: var(--muted);
     text-align: center;
-    padding: 0 2px 6px 2px;
-    border-bottom: 1px solid var(--border);
+    padding-bottom: 5px;
   }
-  .row-item {
+  .seg-row {
     display: grid;
-    grid-template-columns: 32px 1fr 0.85fr 0.85fr 54px 32px;
+    grid-template-columns: 28px 1fr 0.8fr 0.9fr 58px 28px;
     gap: 5px;
     align-items: center;
-    padding: 6px 2px;
-    border-bottom: 1px solid #f1f5f9;
+    margin-bottom: 6px;
   }
-  .row-num {
-    text-align: center;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--muted);
-    background: #f8fafc;
-    border-radius: 6px;
-    padding: 8px 0;
-  }
-  .row-input {
-    width: 100%;
-    padding: 8px 6px;
-    font-size: 15px;
-    font-weight: 700;
-    text-align: center;
-    border: 1.5px solid var(--yellow-border);
-    background: var(--yellow);
-    border-radius: 7px;
-    color: #1e3a8a;
-  }
-  .row-calc {
-    text-align: center;
-    font-size: 13.5px;
-    font-weight: 700;
+  .cell-ro {
     background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
     padding: 8px 4px;
-    border-radius: 7px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 13px;
     color: #334155;
   }
-  .row-holes {
-    text-align: center;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--primary);
-    background: #eff6ff;
-    padding: 8px 2px;
-    border-radius: 7px;
-  }
-  .row-holes.last-edge {
-    background: #f8fafc;
-    color: var(--muted);
-    font-weight: 500;
+  .cell-ro.edge {
     font-size: 11px;
+    color: var(--muted);
   }
   .btn-del-row {
-    background: transparent;
+    background: none;
     border: none;
     color: #ef4444;
     font-size: 18px;
     font-weight: 700;
     cursor: pointer;
-    padding: 4px;
-    text-align: center;
+    padding: 0;
   }
   .btn-add-row {
     width: 100%;
-    margin-top: 10px;
-    padding: 11px;
-    background: var(--primary-light);
-    color: var(--accent);
-    border: 1.5px dashed var(--accent);
-    border-radius: 9px;
-    font-size: 14px;
+    padding: 10px;
+    margin-top: 6px;
+    border-radius: 10px;
+    border: 1.5px dashed var(--primary-light);
+    background: #eff6ff;
+    color: var(--primary);
     font-weight: 700;
+    font-size: 14px;
     cursor: pointer;
   }
-  .btn-add-row:active { background: #dbeafe; }
 
   /* Kinco Table */
+  .kinco-meta {
+    display: flex;
+    justify-content: space-between;
+    background: #f8fafc;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
   .kinco-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 14px;
   }
   .kinco-table th {
-    background: #1e293b;
-    color: #fff;
-    padding: 8px 6px;
+    background: #e2e8f0;
+    padding: 7px 4px;
     font-size: 12px;
     text-align: center;
+    border: 1px solid #cbd5e1;
   }
   .kinco-table td {
-    padding: 8px 6px;
+    padding: 7px 4px;
     text-align: center;
-    border-bottom: 1px solid #e2e8f0;
-    font-weight: 600;
+    border: 1px solid #e2e8f0;
+    font-weight: 700;
   }
-  .kinco-table tr:nth-child(even) td { background: #f8fafc; }
-  .code-badge {
-    display: inline-block;
-    padding: 3px 9px;
-    border-radius: 6px;
-    font-weight: 800;
-    font-family: monospace;
-    font-size: 14px;
-  }
-  .code-11 { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
-  .code-01 { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
-  .code-10 { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+  .code-11 { background: #dcfce7; color: #166534; }
+  .code-01 { background: #dbeafe; color: #1e40af; }
+  .code-10 { background: #fef3c7; color: #92400e; }
 
-  .actions-row {
-    display: flex;
+  .action-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 8px;
-    margin-bottom: 10px;
+    margin-top: 10px;
   }
   .btn-action {
-    flex: 1;
     padding: 10px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: #fff;
-    font-size: 13px;
+    border-radius: 10px;
+    border: none;
+    background: var(--primary);
+    color: #fff;
     font-weight: 700;
-    color: var(--text);
+    font-size: 13px;
     cursor: pointer;
   }
-  .btn-action.primary {
-    background: var(--accent);
-    color: #fff;
-    border-color: var(--accent);
+  .btn-action.secondary {
+    background: #475569;
   }
 
   /* Settings */
-  .setting-row {
+  .set-row {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 10px 0;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 0;
     border-bottom: 1px solid #f1f5f9;
-    gap: 12px;
   }
-  .setting-row label {
-    font-size: 13.5px;
+  .set-row label {
+    font-size: 13px;
     font-weight: 600;
-    color: var(--text);
+    flex: 1;
   }
-  .setting-row small {
-    display: block;
-    font-size: 11px;
-    color: var(--muted);
-    font-weight: 400;
-  }
-  .setting-row input, .setting-row select {
+  .set-row input, .set-row select {
     width: 110px;
-    padding: 8px;
-    font-size: 15px;
-    font-weight: 700;
-    text-align: center;
-    border: 1.5px solid var(--yellow-border);
-    background: var(--yellow);
-    border-radius: 8px;
-    color: #1e3a8a;
   }
 
-/* Bottom Nav */
+  /* Bottom Nav */
   .bottom-nav {
     position: fixed;
     bottom: 0;
@@ -440,8 +362,6 @@
     box-shadow: 0 -2px 8px rgba(0,0,0,0.06);
     padding-bottom: calc(44px + env(safe-area-inset-bottom));
   }
-
-  }
   .nav-btn {
     flex: 1;
     padding: 10px 4px;
@@ -450,743 +370,630 @@
     font-size: 12px;
     font-weight: 700;
     color: var(--muted);
-    cursor: pointer;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 3px;
+    gap: 2px;
+    cursor: pointer;
   }
   .nav-btn.active {
-    color: var(--accent);
+    color: var(--primary-light);
     background: #eff6ff;
   }
-  .nav-icon { font-size: 18px; }
+  .nav-icon { font-size: 17px; }
 
-  .page { display: none; }
-  .page.active { display: block; }
-
-  .toast {
-    position: fixed;
-    bottom: 72px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #0f172a;
-    color: #fff;
-    padding: 9px 16px;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: 600;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s;
-    z-index: 50;
-  }
-  .toast.show { opacity: 1; }
+  .view { display: none; }
+  .view.active { display: block; }
 
   @media print {
-    header, .bottom-nav, .actions-row, .btn-add-row, .marks-bar-wrap { display: none !important; }
+    .topbar, .bottom-nav, .tabs-strip, .btn-add-row, .btn-del-row, .action-row, .hint { display: none !important; }
     body { background: #fff; padding: 0; }
-    .page { display: block !important; }
+    .view { display: block !important; }
     .card { box-shadow: none; border: 1px solid #000; }
   }
 </style>
 </head>
 <body>
 
-<header>
+<div class="topbar">
   <div>
-    <h1>Kinco ЧПУ • Пробивка</h1>
-    <div class="sub">Автономный калькулятор (v2 • Вкладки марок)</div>
+    <div class="topbar-title">Kinco ЧПУ • Пробивка</div>
+    <div class="topbar-sub" id="offlineBadge">Автономный калькулятор (v3 • Офлайн)</div>
   </div>
-  <button class="btn-top" onclick="saveCurrentToTabs(true)">💾 Сохранить</button>
-</header>
+  <button class="btn-top" onclick="saveState(true)">💾 Сохранить</button>
+</div>
 
-<div class="container">
-  <!-- Status Banner -->
-  <div id="statusBanner" class="status-banner ok">
-    <div id="statusTitle" class="status-title">✅ ГОТОВО К ЗАПУСКУ</div>
-    <div class="status-grid">
-      <div class="status-item">
-        <span>Длина (Расчет / Чертеж)</span>
-        <strong id="stLength">0 / 0 мм</strong>
-      </div>
-      <div class="status-item">
-        <span>Отверстия и строки Kinco</span>
-        <strong id="stHoles">0 пар • 0/49 стр.</strong>
-      </div>
-      <div class="status-item">
-        <span>Стартовый удар / Габарит</span>
-        <strong id="stStart">НЕТ • В пределах</strong>
-      </div>
-      <div class="status-item">
-        <span>Итого на партию</span>
-        <strong id="stBatch">1 шт. • 0 пар • 0 м.п.</strong>
-      </div>
-    </div>
+<!-- Status Banner -->
+<div class="status-box" id="statusBox">
+  <div class="status-main" id="statusMain">✅ ГОТОВО К ЗАПУСКУ</div>
+  <div class="status-grid">
+    <div class="status-item">Длина (Расчет / Чертеж)<b id="stLen">0 / 0 мм</b></div>
+    <div class="status-item">Отверстия и строки Kinco<b id="stHoles">0 пар • 0/49 стр.</b></div>
+    <div class="status-item">Стартовый удар / Габарит<b id="stStart">НЕТ • В пределах</b></div>
+    <div class="status-item">Итого на партию<b id="stBatch">1 шт. • 0 пар • 0.00 м.п.</b></div>
   </div>
+</div>
 
-  <!-- PAGE 1: INPUT -->
-  <div id="page-input" class="page active">
-    <div class="card">
-      <div class="card-title">
-        <span>Блок 1. Параметры и развертка</span>
-        <span id="activeTabBadge" style="font-size:11px; color:#2563eb;"></span>
+<!-- VIEW 1: BLOCK 1 -->
+<div class="view active" id="view-1">
+  <div class="card">
+    <div class="card-title">Блок 1. Параметры и развертка</div>
+    <div class="meta-grid">
+      <div class="field">
+        <label>Марка детали</label>
+        <input type="text" id="inpMark" oninput="updateMeta()">
       </div>
-
-      <div class="meta-grid" style="margin-bottom:10px;">
-        <div class="field">
-          <label>Марка детали</label>
-          <input type="text" id="inpMark" value="Б1-2" oninput="onMetaChange()">
-        </div>
-        <div class="field">
-          <label>Общая длина L, мм</label>
-          <input type="number" id="inpLength" value="4970" inputmode="numeric" oninput="onMetaChange()">
-        </div>
-        <div class="field">
-          <label>Кол-во, шт.</label>
-          <input type="number" id="inpQty" value="4" min="1" inputmode="numeric" oninput="onMetaChange()">
-        </div>
+      <div class="field">
+        <label>Общая длина L, мм</label>
+        <input type="number" id="inpLen" inputmode="numeric" oninput="updateMeta()">
       </div>
-
-      <div class="hint-box">
-        <strong>Подсказка:</strong> последняя строка (отступ до правого торца) учитывается в общей длине, но отверстие на самом краю детали не добавляет.
-      </div>
-
-      <!-- Saved Marks Tabs -->
-      <div class="marks-bar-wrap">
-        <div id="marksTabs" class="marks-tabs"></div>
-        <button class="btn-add-mark" onclick="createNewTab()">+ Марка</button>
-        <button class="btn-clear" onclick="clearRows()">Очистить</button>
-      </div>
-
-      <div class="rows-header">
-        <div>№</div>
-        <div>Шаг, мм</div>
-        <div>Шагов</div>
-        <div>Размер</div>
-        <div>Отв.</div>
-        <div></div>
-      </div>
-      <div id="rowsContainer"></div>
-
-      <button class="btn-add-row" onclick="addRow()">+ Добавить участок</button>
-    </div>
-  </div>
-
-  <!-- PAGE 2: KINCO OUTPUT -->
-  <div id="page-kinco" class="page">
-    <div class="card">
-      <div class="card-title">
-        <span>Блок 2. Программа для пульта Kinco</span>
-        <span id="kincoMeta" style="font-size:12px; color:#0f172a;"></span>
-      </div>
-
-      <div class="actions-row">
-        <button class="btn-action primary" onclick="copyKincoProgram()">📋 Копировать строки</button>
-        <button class="btn-action" onclick="window.print()">🖨️ Печать карты</button>
-      </div>
-
-      <table class="kinco-table">
-        <thead>
-          <tr>
-            <th style="width:52px;">№ стр.</th>
-            <th>ММ.</th>
-            <th style="width:68px;">Код Ш</th>
-            <th style="width:58px;">Ряд 1</th>
-            <th style="width:58px;">Ряд 2</th>
-          </tr>
-        </thead>
-        <tbody id="kincoBody"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- PAGE 3: SETTINGS & BACKUP -->
-  <div id="page-settings" class="page">
-    <div class="card">
-      <div class="card-title">Настройки станка и штампов</div>
-      <div class="setting-row">
-        <div>
-          <label>Шаг по умолчанию, мм</label>
-          <small>Подставляется при добавлении новой строки</small>
-        </div>
-        <input type="number" id="setDefStep" value="80" inputmode="numeric" onchange="saveSettings()">
-      </div>
-      <div class="setting-row">
-        <div>
-          <label>База между рядами ΔX, мм</label>
-          <small>Расстояние между 1-м и 2-м рядом штампов</small>
-        </div>
-        <input type="number" id="setBase" value="160" inputmode="numeric" onchange="saveSettings()">
-      </div>
-      <div class="setting-row">
-        <div>
-          <label>Отсчет от ряда штампов</label>
-          <small>1 — передний ряд, 2 — задний ряд</small>
-        </div>
-        <select id="setRefRow" onchange="saveSettings()">
-          <option value="1" selected>1 (Передний)</option>
-          <option value="2">2 (Задний)</option>
-        </select>
-      </div>
-      <div class="setting-row">
-        <div>
-          <label>Порог стартового удара, мм</label>
-          <small>Если первый отступ ≥ порога, бьет старт</small>
-        </div>
-        <input type="number" id="setStartThresh" value="800" inputmode="numeric" onchange="saveSettings()">
-      </div>
-      <div class="setting-row">
-        <div>
-          <label>Координата стартового удара, мм</label>
-          <small>Позиция удара кодом 11 при большом отступе</small>
-        </div>
-        <input type="number" id="setStartCoord" value="100" inputmode="numeric" onchange="saveSettings()">
+      <div class="field">
+        <label>Кол-во, шт.</label>
+        <input type="number" id="inpQty" inputmode="numeric" min="1" oninput="updateMeta()">
       </div>
     </div>
 
-    <div class="card">
-      <div class="card-title">Резервная копия вкладок марок</div>
-      <p style="font-size:12.5px; color:var(--muted); margin-top:0;">
-        Вы можете выгрузить все сохраненные вкладки марок в один файл, чтобы перенести их с компьютера на телефон или поделиться с коллегой.
-      </p>
-      <div class="actions-row">
-        <button class="btn-action primary" onclick="exportAllTabs()">⬇️ Экспорт базы (.json)</button>
-        <button class="btn-action" onclick="document.getElementById('importFile').click()">⬆️ Загрузить базу</button>
-        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importAllTabs(event)">
-      </div>
-      <button class="btn-action" style="width:100%; color:#991b1b; border-color:#fecaca; background:#fef2f2;" onclick="resetDefaultTabs()">Сбросить вкладки на стандартные примеры</button>
+    <div class="hint">
+      <b>Подсказка:</b> последняя строка (отступ до правого торца) учитывается в общей длине, но отверстие на самом краю детали не добавляет.
+    </div>
+
+    <div class="tabs-strip" id="tabsStrip"></div>
+
+    <div class="seg-header">
+      <div>№</div>
+      <div>Шаг, мм</div>
+      <div>Шагов</div>
+      <div>Размер</div>
+      <div>Отв.</div>
+      <div></div>
+    </div>
+    <div id="segList"></div>
+
+    <button class="btn-add-row" onclick="addSegment()">+ Добавить участок</button>
+  </div>
+</div>
+
+<!-- VIEW 2: BLOCK 2 -->
+<div class="view" id="view-2">
+  <div class="card">
+    <div class="card-title">Блок 2. Программа для пульта Kinco</div>
+    <div class="kinco-meta" id="kincoHeader">Марка: — | L = 0 мм | 1 шт.</div>
+    <table class="kinco-table">
+      <thead>
+        <tr>
+          <th style="width:46px;">Стр.</th>
+          <th>ММ. (Коорд.)</th>
+          <th style="width:64px;">Код Ш</th>
+          <th style="width:52px;">Ряд 1</th>
+          <th style="width:52px;">Ряд 2</th>
+        </tr>
+      </thead>
+      <tbody id="kincoBody"></tbody>
+    </table>
+    <div class="action-row">
+      <button class="btn-action" onclick="copyProgram()">📋 Копировать текст</button>
+      <button class="btn-action secondary" onclick="window.print()">🖨️ Печать карты</button>
     </div>
   </div>
 </div>
 
-<nav class="bottom-nav">
-  <button class="nav-btn active" id="nav-input" onclick="switchPage('input')">
+<!-- VIEW 3: SETTINGS -->
+<div class="view" id="view-3">
+  <div class="card">
+    <div class="card-title">Настройки станка и штампов</div>
+    <div class="set-row">
+      <label>Базовый шаг, мм (справочно)</label>
+      <input type="number" id="setStep" inputmode="numeric" onchange="updateSettings()">
+    </div>
+    <div class="set-row">
+      <label>База между рядами штампов ΔX, мм</label>
+      <input type="number" id="setDx" inputmode="numeric" onchange="updateSettings()">
+    </div>
+    <div class="set-row">
+      <label>Отсчет от ряда штампов (1 или 2)</label>
+      <select id="setRef" onchange="updateSettings()">
+        <option value="1">1 (Передний)</option>
+        <option value="2">2 (Задний)</option>
+      </select>
+    </div>
+    <div class="set-row">
+      <label>Порог первого отступа, мм (≥)</label>
+      <input type="number" id="setThresh" inputmode="numeric" onchange="updateSettings()">
+    </div>
+    <div class="set-row">
+      <label>Координата стартового удара, мм</label>
+      <input type="number" id="setStartPos" inputmode="numeric" onchange="updateSettings()">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Резервная копия базы марок</div>
+    <div class="hint">Сохраните все вкладки в файл, чтобы перенести их на другой телефон без интернета.</div>
+    <div class="action-row">
+      <button class="btn-action" onclick="exportBackup()">⬇️ Скачать базу (.json)</button>
+      <button class="btn-action secondary" onclick="document.getElementById('fileImport').click()">⬆️ Загрузить базу</button>
+      <input type="file" id="fileImport" accept=".json" style="display:none" onchange="importBackup(event)">
+    </div>
+  </div>
+</div>
+
+<!-- Bottom Nav -->
+<div class="bottom-nav">
+  <button class="nav-btn active" id="nav-1" onclick="switchView(1)">
     <span class="nav-icon">📐</span>
     <span>Блок 1: Ввод</span>
   </button>
-  <button class="nav-btn" id="nav-kinco" onclick="switchPage('kinco')">
+  <button class="nav-btn" id="nav-2" onclick="switchView(2)">
     <span class="nav-icon">⚙️</span>
     <span>Блок 2: Kinco</span>
   </button>
-  <button class="nav-btn" id="nav-settings" onclick="switchPage('settings')">
-    <span class="nav-icon">🔧</span>
+  <button class="nav-btn" id="nav-3" onclick="switchView(3)">
+    <span class="nav-icon">🛠️</span>
     <span>Настройки</span>
   </button>
-</nav>
-
-<div id="toast" class="toast">Сохранено</div>
+</div>
 
 <script>
-const STORAGE_TABS_KEY = 'kinco_tabs_v2';
-const STORAGE_ACTIVE_KEY = 'kinco_active_tab_v2';
-const STORAGE_SETTINGS_KEY = 'kinco_settings_v2';
+const STORAGE_KEY = 'kinco_lstk_app_v3';
 
-const DEFAULT_TABS = [
-  {
-    id: 'tab_b1_2',
-    mark: 'Б1-2',
-    length: 4970,
-    qty: 4,
-    rows: [
-      { step: 50, count: 1 },
-      { step: 80, count: 7 },
-      { step: 1635, count: 1 },
-      { step: 80, count: 3 },
-      { step: 1874, count: 1 },
-      { step: 80, count: 7 },
-      { step: 50, count: 1 }
-    ]
-  },
-  {
-    id: 'tab_k1_3',
-    mark: 'К1-3',
-    length: 10990,
-    qty: 4,
-    rows: [
-      { step: 50, count: 1 },
-      { step: 80, count: 7 },
-      { step: 8540, count: 1 },
-      { step: 80, count: 5 },
-      { step: 830, count: 1 },
-      { step: 80, count: 7 },
-      { step: 50, count: 1 }
-    ]
-  },
-  {
-    id: 'tab_rs7',
-    mark: 'Рс7',
-    length: 4810,
-    qty: 2,
-    rows: [
-      { step: 1015, count: 1 },
-      { step: 900, count: 3 },
-      { step: 1015, count: 1 },
-      { step: 40, count: 1 }
-    ]
-  }
-];
-
-let tabs = [];
-let activeTabId = '';
-let settings = {
-  defStep: 80,
-  base: 160,
-  refRow: 1,
-  startThresh: 800,
-  startCoord: 100
+const DEFAULT_DATA = {
+  settings: { step: 80, dx: 160, ref: 1, thresh: 800, startPos: 100 },
+  activeId: 'b12',
+  marks: [
+    {
+      id: 'b12',
+      mark: 'Б1-2',
+      length: 4970,
+      qty: 4,
+      segments: [
+        { step: 50, count: 1 },
+        { step: 80, count: 7 },
+        { step: 1635, count: 1 },
+        { step: 80, count: 3 },
+        { step: 1874, count: 1 },
+        { step: 80, count: 7 },
+        { step: 50, count: 1 }
+      ]
+    },
+    {
+      id: 'k13',
+      mark: 'К1-3',
+      length: 10990,
+      qty: 4,
+      segments: [
+        { step: 50, count: 1 },
+        { step: 80, count: 7 },
+        { step: 8540, count: 1 },
+        { step: 80, count: 5 },
+        { step: 830, count: 1 },
+        { step: 80, count: 7 },
+        { step: 50, count: 1 }
+      ]
+    },
+    {
+      id: 'rs7',
+      mark: 'Рс7',
+      length: 4810,
+      qty: 2,
+      segments: [
+        { step: 1055, count: 1 },
+        { step: 900, count: 4 },
+        { step: 115, count: 1 }
+      ]
+    }
+  ]
 };
 
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2000);
-}
+let state = loadState();
+let lastKincoRows = [];
 
 function loadState() {
   try {
-    const savedSet = localStorage.getItem(STORAGE_SETTINGS_KEY);
-    if (savedSet) settings = { ...settings, ...JSON.parse(savedSet) };
-  } catch (e) {}
-
-  document.getElementById('setDefStep').value = settings.defStep;
-  document.getElementById('setBase').value = settings.base;
-  document.getElementById('setRefRow').value = settings.refRow;
-  document.getElementById('setStartThresh').value = settings.startThresh;
-  document.getElementById('setStartCoord').value = settings.startCoord;
-
-  try {
-    const savedTabs = localStorage.getItem(STORAGE_TABS_KEY);
-    if (savedTabs) {
-      const parsed = JSON.parse(savedTabs);
-      if (Array.isArray(parsed) && parsed.length > 0) tabs = parsed;
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && Array.isArray(parsed.marks) && parsed.marks.length > 0) return parsed;
     }
   } catch (e) {}
-
-  if (tabs.length === 0) {
-    tabs = JSON.parse(JSON.stringify(DEFAULT_TABS));
-  }
-
-  const savedActive = localStorage.getItem(STORAGE_ACTIVE_KEY);
-  if (savedActive && tabs.some(t => t.id === savedActive)) {
-    activeTabId = savedActive;
-  } else {
-    activeTabId = tabs[0].id;
-  }
-
-  selectTab(activeTabId, false);
+  return JSON.parse(JSON.stringify(DEFAULT_DATA));
 }
 
-function persistTabs() {
+function saveState(notify = false) {
   try {
-    localStorage.setItem(STORAGE_TABS_KEY, JSON.stringify(tabs));
-    localStorage.setItem(STORAGE_ACTIVE_KEY, activeTabId);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    if (notify) alert('Все вкладки сохранены в память телефона!');
   } catch (e) {}
 }
 
-function saveSettings() {
-  settings.defStep = Number(document.getElementById('setDefStep').value) || 80;
-  settings.base = Number(document.getElementById('setBase').value) || 160;
-  settings.refRow = Number(document.getElementById('setRefRow').value) || 1;
-  settings.startThresh = Number(document.getElementById('setStartThresh').value) || 800;
-  settings.startCoord = Number(document.getElementById('setStartCoord').value) || 0;
-  try {
-    localStorage.setItem(STORAGE_SETTINGS_KEY, JSON.stringify(settings));
-  } catch (e) {}
-  recalculate();
-  showToast('Настройки обновлены');
+function getActiveMark() {
+  let m = state.marks.find(x => x.id === state.activeId);
+  if (!m) {
+    m = state.marks[0];
+    state.activeId = m.id;
+  }
+  return m;
 }
 
-function getActiveTab() {
-  return tabs.find(t => t.id === activeTabId) || tabs[0];
-}
-
-function renderTabsBar() {
-  const container = document.getElementById('marksTabs');
-  container.innerHTML = '';
-  tabs.forEach(tab => {
-    const el = document.createElement('div');
-    el.className = 'mark-tab' + (tab.id === activeTabId ? ' active' : '');
-    const title = (tab.mark || 'Без имени').trim() || 'Без имени';
-    el.innerHTML = `<span>${escapeHtml(title)}</span>` +
-      (tabs.length > 1 ? `<span class="del-tab" title="Удалить вкладку" onclick="deleteTab(event, '${tab.id}')">×</span>` : '');
-    el.onclick = () => selectTab(tab.id, true);
-    container.appendChild(el);
+function switchView(num) {
+  [1, 2, 3].forEach(i => {
+    document.getElementById('view-' + i).classList.toggle('active', i === num);
+    document.getElementById('nav-' + i).classList.toggle('active', i === num);
   });
+  window.scrollTo(0, 0);
 }
 
-function selectTab(id, notify) {
-  activeTabId = id;
-  const tab = getActiveTab();
-  document.getElementById('inpMark').value = tab.mark;
-  document.getElementById('inpLength').value = tab.length;
-  document.getElementById('inpQty').value = tab.qty;
-  persistTabs();
-  renderTabsBar();
-  renderRows();
-  recalculate();
-  if (notify) showToast('Открыта марка: ' + (tab.mark || 'Новая'));
-}
+function renderTabs() {
+  const strip = document.getElementById('tabsStrip');
+  strip.innerHTML = '';
+  state.marks.forEach(m => {
+    const btn = document.createElement('div');
+    btn.className = 'mark-tab' + (m.id === state.activeId ? ' active' : '');
+    const title = m.mark.trim() || 'Без имени';
+    btn.innerHTML = `<span>${escapeHtml(title)}</span>`;
+    btn.onclick = () => {
+      state.activeId = m.id;
+      saveState();
+      renderAll();
+    };
+    if (state.marks.length > 1) {
+      const del = document.createElement('span');
+      del.className = 'del-tab';
+      del.textContent = '×';
+      del.onclick = (e) => {
+        e.stopPropagation();
+        if (confirm(`Удалить вкладку «${title}»?`)) {
+          state.marks = state.marks.filter(x => x.id !== m.id);
+          if (state.activeId === m.id) state.activeId = state.marks[0].id;
+          saveState();
+          renderAll();
+        }
+      };
+      btn.appendChild(del);
+    }
+    strip.appendChild(btn);
+  });
 
-function createNewTab() {
-  const newId = 'tab_' + Date.now();
-  const num = tabs.length + 1;
-  const newTab = {
-    id: newId,
-    mark: 'Марка-' + num,
-    length: 3000,
-    qty: 1,
-    rows: [
-      { step: 40, count: 1 },
-      { step: settings.defStep, count: 3 },
-      { step: 40, count: 1 }
-    ]
+  const addBtn = document.createElement('button');
+  addBtn.className = 'btn-add-mark';
+  addBtn.textContent = '+ Марка';
+  addBtn.onclick = () => {
+    const newId = 'm_' + Date.now();
+    state.marks.push({
+      id: newId,
+      mark: 'Новая',
+      length: 0,
+      qty: 1,
+      segments: [{ step: '', count: 1 }]
+    });
+    state.activeId = newId;
+    saveState();
+    renderAll();
   };
-  tabs.push(newTab);
-  selectTab(newId, false);
-  showToast('Создана новая вкладка');
-}
+  strip.appendChild(addBtn);
 
-function deleteTab(ev, id) {
-  ev.stopPropagation();
-  if (tabs.length <= 1) return;
-  const target = tabs.find(t => t.id === id);
-  if (!confirm(`Удалить вкладку "${target ? target.mark : ''}"?`)) return;
-  tabs = tabs.filter(t => t.id !== id);
-  if (activeTabId === id) {
-    activeTabId = tabs[0].id;
-  }
-  selectTab(activeTabId, false);
-  showToast('Вкладка удалена');
-}
-
-function onMetaChange() {
-  const tab = getActiveTab();
-  tab.mark = document.getElementById('inpMark').value;
-  tab.length = Number(document.getElementById('inpLength').value) || 0;
-  tab.qty = Math.max(1, Number(document.getElementById('inpQty').value) || 1);
-  persistTabs();
-  renderTabsBar();
-  recalculate();
-}
-
-function saveCurrentToTabs(notify) {
-  onMetaChange();
-  if (notify) showToast('Вкладка "' + (getActiveTab().mark || 'Марка') + '" сохранена');
-}
-
-function renderRows() {
-  const tab = getActiveTab();
-  const container = document.getElementById('rowsContainer');
-  container.innerHTML = '';
-
-  // Find last active row index (where step > 0)
-  let lastValidIdx = -1;
-  tab.rows.forEach((r, idx) => {
-    if ((Number(r.step) || 0) > 0) lastValidIdx = idx;
-  });
-
-  let accumHoles = 0;
-
-  tab.rows.forEach((row, idx) => {
-    const step = Number(row.step) || 0;
-    const count = step > 0 ? (Math.max(1, Number(row.count) || 1)) : 0;
-    const segSize = step * count;
-    const isLastEdge = (idx === lastValidIdx && lastValidIdx > 0);
-
-    if (step > 0 && !isLastEdge) {
-      accumHoles += count;
+  const clrBtn = document.createElement('button');
+  clrBtn.className = 'btn-clear';
+  clrBtn.textContent = 'Очистить';
+  clrBtn.onclick = () => {
+    if (confirm('Очистить участки текущей марки?')) {
+      const m = getActiveMark();
+      m.segments = [{ step: '', count: 1 }];
+      saveState();
+      renderAll();
     }
+  };
+  strip.appendChild(clrBtn);
+}
 
-    const div = document.createElement('div');
-    div.className = 'row-item';
-    div.innerHTML = `
-      <div class="row-num">${idx + 1}</div>
-      <input class="row-input" type="number" inputmode="numeric" value="${row.step === '' ? '' : row.step}" placeholder="0"
-        oninput="updateRow(${idx}, 'step', this.value)">
-      <input class="row-input" type="number" inputmode="numeric" value="${row.count === '' ? '' : row.count}" placeholder="1"
-        oninput="updateRow(${idx}, 'count', this.value)">
-      <div class="row-calc" id="seg_${idx}">${segSize}</div>
-      <div class="row-holes ${isLastEdge ? 'last-edge' : ''}" id="hol_${idx}">${step > 0 ? (isLastEdge ? accumHoles + ' (край)' : accumHoles) : '-'}</div>
-      <button class="btn-del-row" title="Удалить строку" onclick="removeRow(${idx})">×</button>
-    `;
-    container.appendChild(div);
+function renderSettings() {
+  const s = state.settings;
+  document.getElementById('setStep').value = s.step;
+  document.getElementById('setDx').value = s.dx;
+  document.getElementById('setRef').value = String(s.ref);
+  document.getElementById('setThresh').value = s.thresh;
+  document.getElementById('setStartPos').value = s.startPos;
+}
+
+function updateSettings() {
+  state.settings.step = Number(document.getElementById('setStep').value) || 80;
+  state.settings.dx = Number(document.getElementById('setDx').value) || 160;
+  state.settings.ref = Number(document.getElementById('setRef').value) || 1;
+  state.settings.thresh = Number(document.getElementById('setThresh').value) || 800;
+  state.settings.startPos = Number(document.getElementById('setStartPos').value) || 100;
+  saveState();
+  recalculate();
+}
+
+function updateMeta() {
+  const m = getActiveMark();
+  m.mark = document.getElementById('inpMark').value;
+  m.length = Number(document.getElementById('inpLen').value) || 0;
+  m.qty = Math.max(1, Number(document.getElementById('inpQty').value) || 1);
+  saveState();
+  renderTabs();
+  recalculate();
+}
+
+function addSegment() {
+  const m = getActiveMark();
+  m.segments.push({ step: '', count: 1 });
+  saveState();
+  renderSegments();
+  recalculate();
+}
+
+function renderSegments() {
+  const m = getActiveMark();
+  document.getElementById('inpMark').value = m.mark;
+  document.getElementById('inpLen').value = m.length || '';
+  document.getElementById('inpQty').value = m.qty || 1;
+
+  const list = document.getElementById('segList');
+  list.innerHTML = '';
+
+  m.segments.forEach((seg, idx) => {
+    const row = document.createElement('div');
+    row.className = 'seg-row';
+
+    const numCell = document.createElement('div');
+    numCell.className = 'cell-ro';
+    numCell.textContent = idx + 1;
+
+    const stepInp = document.createElement('input');
+    stepInp.type = 'number';
+    stepInp.inputMode = 'numeric';
+    stepInp.value = seg.step === '' ? '' : seg.step;
+    stepInp.placeholder = '0';
+    stepInp.oninput = () => {
+      seg.step = stepInp.value === '' ? '' : Number(stepInp.value);
+      saveState();
+      recalculate();
+    };
+
+    const cntInp = document.createElement('input');
+    cntInp.type = 'number';
+    cntInp.inputMode = 'numeric';
+    cntInp.value = seg.count === '' ? '' : seg.count;
+    cntInp.placeholder = '1';
+    cntInp.oninput = () => {
+      seg.count = cntInp.value === '' ? '' : Number(cntInp.value);
+      saveState();
+      recalculate();
+    };
+
+    const sizeCell = document.createElement('div');
+    sizeCell.className = 'cell-ro';
+    sizeCell.id = 'seg-size-' + idx;
+
+    const holeCell = document.createElement('div');
+    holeCell.className = 'cell-ro';
+    holeCell.id = 'seg-hole-' + idx;
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'btn-del-row';
+    delBtn.textContent = '×';
+    delBtn.onclick = () => {
+      if (m.segments.length > 1) {
+        m.segments.splice(idx, 1);
+      } else {
+        m.segments[0] = { step: '', count: 1 };
+      }
+      saveState();
+      renderSegments();
+      recalculate();
+    };
+
+    row.append(numCell, stepInp, cntInp, sizeCell, holeCell, delBtn);
+    list.appendChild(row);
   });
-}
-
-function updateRow(idx, field, val) {
-  const tab = getActiveTab();
-  tab.rows[idx][field] = val === '' ? '' : Number(val);
-  persistTabs();
-  // Update calculated cells without losing input focus
-  updateRowDisplayAndCalc();
-}
-
-function updateRowDisplayAndCalc() {
-  const tab = getActiveTab();
-  let lastValidIdx = -1;
-  tab.rows.forEach((r, idx) => {
-    if ((Number(r.step) || 0) > 0) lastValidIdx = idx;
-  });
-
-  let accumHoles = 0;
-  tab.rows.forEach((row, idx) => {
-    const step = Number(row.step) || 0;
-    const count = step > 0 ? (Math.max(1, Number(row.count) || 1)) : 0;
-    const segSize = step * count;
-    const isLastEdge = (idx === lastValidIdx && lastValidIdx > 0);
-    if (step > 0 && !isLastEdge) accumHoles += count;
-
-    const segEl = document.getElementById(`seg_${idx}`);
-    const holEl = document.getElementById(`hol_${idx}`);
-    if (segEl) segEl.textContent = segSize;
-    if (holEl) {
-      holEl.className = 'row-holes' + (isLastEdge ? ' last-edge' : '');
-      holEl.textContent = step > 0 ? (isLastEdge ? `${accumHoles} (край)` : accumHoles) : '-';
-    }
-  });
-  recalculate();
-}
-
-function addRow() {
-  const tab = getActiveTab();
-  tab.rows.push({ step: settings.defStep, count: 1 });
-  persistTabs();
-  renderRows();
-  recalculate();
-}
-
-function removeRow(idx) {
-  const tab = getActiveTab();
-  if (tab.rows.length <= 1) {
-    tab.rows[0] = { step: '', count: 1 };
-  } else {
-    tab.rows.splice(idx, 1);
-  }
-  persistTabs();
-  renderRows();
-  recalculate();
-}
-
-function clearRows() {
-  const tab = getActiveTab();
-  tab.rows = [{ step: '', count: 1 }];
-  persistTabs();
-  renderRows();
-  recalculate();
-  showToast('Строки очищены');
 }
 
 function recalculate() {
-  const tab = getActiveTab();
-  const targetL = Number(tab.length) || 0;
-  const qty = Math.max(1, Number(tab.qty) || 1);
-  const deltaX = Number(settings.base) || 160;
-  const refRow = Number(settings.refRow) || 1;
-  const startThresh = Number(settings.startThresh) || 800;
-  const startCoord = Number(settings.startCoord) || 0;
+  const m = getActiveMark();
+  const s = state.settings;
 
-  let calcL = 0;
-  let lastValidIdx = -1;
-  tab.rows.forEach((r, idx) => {
-    if ((Number(r.step) || 0) > 0) lastValidIdx = idx;
+  // Determine valid filled rows
+  const validRows = m.segments.map((seg, idx) => {
+    const st = Number(seg.step) || 0;
+    const cnt = seg.step === '' || seg.step === 0 ? 0 : (Number(seg.count) > 0 ? Number(seg.count) : 1);
+    return { idx, step: st, count: cnt, size: st * cnt, active: st > 0 && cnt > 0 };
   });
 
-  // Expand hole coordinates X (excluding last edge segment)
-  let coords = [];
-  let runningX = 0;
-  let firstSegSize = 0;
+  let lastActiveIdx = -1;
+  validRows.forEach(r => { if (r.active) lastActiveIdx = r.idx; });
 
-  tab.rows.forEach((r, idx) => {
-    const step = Number(r.step) || 0;
-    const count = step > 0 ? Math.max(1, Number(r.count) || 1) : 0;
-    const seg = step * count;
-    if (idx === 0) firstSegSize = seg;
-    calcL += seg;
+  let calcLen = 0;
+  let cumHoles = 0;
+  const rawCoords = [];
+  let firstActiveSize = 0;
 
-    const isLastEdge = (idx === lastValidIdx && lastValidIdx > 0);
-    if (step > 0 && !isLastEdge) {
-      for (let k = 1; k <= count; k++) {
-        runningX += step;
-        coords.push(runningX);
+  validRows.forEach(r => {
+    const sizeEl = document.getElementById('seg-size-' + r.idx);
+    const holeEl = document.getElementById('seg-hole-' + r.idx);
+
+    if (!r.active) {
+      if (sizeEl) sizeEl.textContent = '0';
+      if (holeEl) { holeEl.textContent = '—'; holeEl.classList.remove('edge'); }
+      return;
+    }
+
+    if (firstActiveSize === 0) firstActiveSize = r.size;
+
+    const isLastEdge = (r.idx === lastActiveIdx && r.idx > 0);
+    if (!isLastEdge) {
+      for (let k = 1; k <= r.count; k++) {
+        rawCoords.push(calcLen + r.step * k);
+        cumHoles++;
+      }
+      if (holeEl) {
+        holeEl.textContent = cumHoles;
+        holeEl.classList.remove('edge');
+      }
+    } else {
+      if (holeEl) {
+        holeEl.textContent = cumHoles + ' (край)';
+        holeEl.classList.add('edge');
       }
     }
+
+    calcLen += r.size;
+    if (sizeEl) sizeEl.textContent = r.size;
   });
 
-  // Pair optimization with deltaX (matching v29 logic)
-  const n = coords.length;
-  const pairedWithPrev = new Array(n).fill(false);
-  const consumedByNext = new Array(n).fill(false);
+  // Optimize punches with dx
+  const dx = s.dx;
+  const used = new Array(rawCoords.length).fill(false);
+  const kincoRows = [];
 
-  for (let i = 0; i < n; i++) {
-    for (let j = 0; j < i; j++) {
-      if (!pairedWithPrev[j] && !consumedByNext[j] && Math.abs((coords[i] - coords[j]) - deltaX) < 0.01) {
-        pairedWithPrev[i] = true;
-        consumedByNext[j] = true;
-        break;
-      }
-    }
-  }
-
-  // Build Kinco program lines
-  const kincoLines = [];
-  const hasStartPunch = (firstSegSize >= startThresh && n > 0);
-
+  const hasStartPunch = firstActiveSize >= s.thresh && s.thresh > 0;
   if (hasStartPunch) {
-    kincoLines.push({
-      mm: startCoord,
+    kincoRows.push({
+      coord: s.startPos,
       code: '11',
       r1: 1,
       r2: 1
     });
   }
 
-  for (let i = 0; i < n; i++) {
-    if (consumedByNext[i]) continue;
-    if (pairedWithPrev[i]) {
-      const mmVal = refRow === 1 ? coords[i] : (coords[i] - deltaX);
-      kincoLines.push({
-        mm: mmVal,
-        code: '11',
-        r1: 1,
-        r2: 1
-      });
+  for (let i = 0; i < rawCoords.length; i++) {
+    if (used[i]) continue;
+    const x1 = rawCoords[i];
+    // Look ahead for x2 = x1 + dx
+    let pairIdx = -1;
+    for (let j = i + 1; j < rawCoords.length; j++) {
+      if (!used[j] && Math.abs((rawCoords[j] - x1) - dx) < 0.001) {
+        pairIdx = j;
+        break;
+      }
+    }
+
+    if (pairIdx !== -1) {
+      used[i] = true;
+      used[pairIdx] = true;
+      const x2 = rawCoords[pairIdx];
+      const coord = (s.ref === 1) ? x2 : x1;
+      kincoRows.push({ coord, code: '11', r1: 1, r2: 1 });
     } else {
-      kincoLines.push({
-        mm: coords[i],
-        code: refRow === 1 ? '01' : '10',
-        r1: refRow === 1 ? 1 : 0,
-        r2: refRow === 1 ? 0 : 1
-      });
+      used[i] = true;
+      if (s.ref === 1) {
+        kincoRows.push({ coord: x1, code: '01', r1: 1, r2: 0 });
+      } else {
+        kincoRows.push({ coord: x1, code: '10', r1: 0, r2: 1 });
+      }
     }
   }
 
-  // Checks
-  const diffL = calcL - targetL;
-  const lenOk = (targetL > 0 && Math.abs(diffL) < 0.01);
-  const maxCoord = kincoLines.length > 0 ? Math.max(...kincoLines.map(l => l.mm)) : 0;
-  const gabaritOk = (targetL > 0 && maxCoord <= targetL);
-  const linesCountOk = (kincoLines.length <= 49);
+  lastKincoRows = kincoRows;
 
-  // Verify total punches
-  const sumR1 = kincoLines.reduce((acc, l) => acc + l.r1, 0);
-  const sumR2 = kincoLines.reduce((acc, l) => acc + l.r2, 0);
-  const expectedTotal = n + (hasStartPunch ? 2 : 0);
-  const punchesOk = ((sumR1 + sumR2) === expectedTotal);
-
-  const allOk = lenOk && gabaritOk && linesCountOk && punchesOk && n > 0;
-
-  // Update Status Banner
-  const banner = document.getElementById('statusBanner');
-  const titleEl = document.getElementById('statusTitle');
-  banner.className = 'status-banner ' + (allOk ? 'ok' : 'err');
-
-  if (allOk) {
-    titleEl.textContent = `✅ ГОТОВО (${kincoLines.length} из 49 стр.) • СТАРТ РАЗРЕШЕН`;
-  } else {
-    let reasons = [];
-    if (!lenOk) reasons.push(`Длина ${diffL > 0 ? '+' + diffL : diffL} мм`);
-    if (!gabaritOk) reasons.push('Выход за габарит L');
-    if (!linesCountOk) reasons.push('Больше 49 строк');
-    if (n === 0) reasons.push('Нет отверстий');
-    titleEl.textContent = `⛔ ОШИБКА (${reasons.join(', ')}) — СТАРТ НЕВОЗМОЖЕН!`;
-  }
-
-  document.getElementById('stLength').textContent = `${calcL} / ${targetL} мм` + (lenOk ? ' (ОК)' : ` (${diffL > 0 ? '+' + diffL : diffL})`);
-  document.getElementById('stHoles').textContent = `${n} пар • ${kincoLines.length}/49 стр.`;
-  document.getElementById('stStart').textContent = (hasStartPunch ? `ДА (${startCoord} мм)` : 'НЕТ') + ' • ' + (gabaritOk ? 'В пределах' : 'ЗА ГАБАРИТОМ!');
-
-  const totalBatchPairs = n * qty;
-  const totalMeters = ((targetL * qty) / 1000).toFixed(2);
-  document.getElementById('stBatch').textContent = `${qty} шт. • ${totalBatchPairs} пар • ${totalMeters} м.п.`;
-
-  // Update Kinco Table
-  document.getElementById('kincoMeta').textContent = `${tab.mark || 'Марка'} • L=${targetL} • ${qty} шт.`;
+  // Render Kinco Table
   const tbody = document.getElementById('kincoBody');
   tbody.innerHTML = '';
+  let maxCoord = 0;
+  let totalR1 = 0, totalR2 = 0;
 
-  const rowsToRender = Math.max(kincoLines.length, 10);
-  for (let idx = 0; idx < Math.min(rowsToRender, 49); idx++) {
-    const line = kincoLines[idx];
+  kincoRows.forEach((kr, idx) => {
+    if (kr.coord > maxCoord) maxCoord = kr.coord;
+    totalR1 += kr.r1;
+    totalR2 += kr.r2;
     const tr = document.createElement('tr');
-    if (line) {
-      const badgeClass = line.code === '11' ? 'code-11' : (line.code === '01' ? 'code-01' : 'code-10');
-      tr.innerHTML = `
-        <td>${idx}</td>
-        <td style="font-size:15px; font-weight:800; color:#0f172a;">${line.mm}</td>
-        <td><span class="code-badge ${badgeClass}">${line.code}</span></td>
-        <td>${line.r1}</td>
-        <td>${line.r2}</td>
-      `;
-    } else {
-      tr.innerHTML = `
-        <td style="color:#94a3b8;">${idx}</td>
-        <td style="color:#cbd5e1;">0</td>
-        <td style="color:#cbd5e1;">00</td>
-        <td style="color:#cbd5e1;">0</td>
-        <td style="color:#cbd5e1;">0</td>
-      `;
-    }
+    const cls = kr.code === '11' ? 'code-11' : (kr.code === '01' ? 'code-01' : 'code-10');
+    tr.innerHTML = `
+      <td>${idx}</td>
+      <td>${kr.coord}</td>
+      <td class="${cls}">${kr.code}</td>
+      <td>${kr.r1}</td>
+      <td>${kr.r2}</td>
+    `;
     tbody.appendChild(tr);
+  });
+
+  if (kincoRows.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="color:#64748b;padding:16px;">Нет данных для пробивки</td></tr>';
   }
 
-  window._lastKincoLines = kincoLines;
+  document.getElementById('kincoHeader').textContent =
+    `Марка: ${m.mark || '—'} | L = ${m.length} мм | ${m.qty} шт.`;
+
+  // Status Checks
+  const lenDiff = calcLen - m.length;
+  const lenOk = (m.length > 0 && lenDiff === 0);
+  const expectedStrikes = cumHoles + (hasStartPunch ? 2 : 0);
+  const holesOk = (totalR1 + totalR2) === expectedStrikes;
+  const limitOk = (m.length > 0 && maxCoord <= m.length);
+  const rowsOk = kincoRows.length > 0 && kincoRows.length <= 49;
+
+  const allOk = lenOk && holesOk && limitOk && rowsOk;
+  const box = document.getElementById('statusBox');
+  const main = document.getElementById('statusMain');
+
+  if (allOk) {
+    box.classList.remove('error');
+    main.textContent = '✅ ГОТОВО К ЗАПУСКУ';
+  } else {
+    box.classList.add('error');
+    const errs = [];
+    if (!lenOk) errs.push(`Длина ${lenDiff > 0 ? '+' + lenDiff : lenDiff} мм`);
+    if (!limitOk && m.length > 0) errs.push('Выход за габарит');
+    if (!rowsOk && kincoRows.length > 49) errs.push('> 49 строк');
+    if (!holesOk) errs.push('Сбой пар');
+    main.textContent = `⛔ ОШИБКА (${errs.join(', ') || 'Проверьте ввод'}) — СТАРТ НЕВОЗМОЖЕН!`;
+  }
+
+  const diffStr = lenDiff === 0 ? 'ОК' : (lenDiff > 0 ? `+${lenDiff}` : `${lenDiff}`);
+  document.getElementById('stLen').textContent = `${calcLen} / ${m.length} мм (${diffStr})`;
+  document.getElementById('stHoles').textContent = `${cumHoles} пар • ${kincoRows.length}/49 стр.`;
+  document.getElementById('stStart').textContent =
+    `${hasStartPunch ? 'ДА (' + s.startPos + ' мм)' : 'НЕТ'} • ${limitOk ? 'В пределах' : 'ЗА ГАБАРИТОМ!'}`;
+
+  const totalBatchHoles = cumHoles * m.qty;
+  const totalMeters = ((m.length * m.qty) / 1000).toFixed(2);
+  document.getElementById('stBatch').textContent =
+    `${m.qty} шт. • ${totalBatchHoles} пар • ${totalMeters} м.п.`;
 }
 
-function copyKincoProgram() {
-  const tab = getActiveTab();
-  const lines = window._lastKincoLines || [];
-  if (lines.length === 0) {
-    showToast('Нет данных для копирования');
+function copyProgram() {
+  if (!lastKincoRows.length) {
+    alert('Программа пуста.');
     return;
   }
-  let text = `Марка: ${tab.mark} | L=${tab.length} мм | Кол-во: ${tab.qty} шт.
-`;
-  text += `Стр.	ММ.	Код Ш
-`;
-  lines.forEach((l, i) => {
-    text += `${i}	${l.mm}	${l.code}
-`;
+  const m = getActiveMark();
+  const lines = [
+    `Марка: ${m.mark} | L = ${m.length} мм | Кол-во: ${m.qty} шт.`,
+    `Стр. | ММ. | Код Ш`
+  ];
+  lastKincoRows.forEach((r, i) => {
+    lines.push(`${i} | ${r.coord} | ${r.code}`);
   });
-  navigator.clipboard.writeText(text).then(() => {
-    showToast('Программа скопирована в буфер');
-  }).catch(() => {
-    showToast('Не удалось скопировать');
-  });
+  const text = lines.join('\n');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => alert('Программа скопирована в буфер обмена!'));
+  } else {
+    prompt('Скопируйте текст программы:', text);
+  }
 }
 
-function exportAllTabs() {
-  const payload = {
-    version: 2,
-    settings,
-    tabs
-  };
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+function exportBackup() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'kinco_baza_marok.json';
+  a.download = 'kinco_marks_backup.json';
   a.click();
   URL.revokeObjectURL(url);
-  showToast('База марок выгружена');
 }
 
-function importAllTabs(ev) {
+function importBackup(ev) {
   const file = ev.target.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = function(e) {
+  reader.onload = (e) => {
     try {
-      const data = JSON.parse(e.target.result);
-      if (data.tabs && Array.isArray(data.tabs) && data.tabs.length > 0) {
-        tabs = data.tabs;
-        if (data.settings) {
-          settings = { ...settings, ...data.settings };
-          localStorage.setItem(STORAGE_SETTINGS_KEY, JSON.stringify(settings));
-        }
-        selectTab(tabs[0].id, false);
-        showToast('Загружено вкладок: ' + tabs.length);
+      const parsed = JSON.parse(e.target.result);
+      if (parsed && Array.isArray(parsed.marks) && parsed.marks.length > 0) {
+        state = parsed;
+        saveState();
+        renderAll();
+        alert('База марок успешно загружена!');
       } else {
         alert('Неверный формат файла базы.');
       }
@@ -1195,21 +1002,6 @@ function importAllTabs(ev) {
     }
   };
   reader.readAsText(file);
-  ev.target.value = '';
-}
-
-function resetDefaultTabs() {
-  if (!confirm('Вернуть 3 стандартные вкладки (Б1-2, К1-3, Рс7)? Текущие вкладки будут заменены.')) return;
-  tabs = JSON.parse(JSON.stringify(DEFAULT_TABS));
-  selectTab(tabs[0].id, false);
-  showToast('Восстановлены примеры');
-}
-
-function switchPage(page) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('page-' + page).classList.add('active');
-  document.getElementById('nav-' + page).classList.add('active');
 }
 
 function escapeHtml(str) {
@@ -1218,7 +1010,23 @@ function escapeHtml(str) {
   }[s]));
 }
 
-loadState();
+function renderAll() {
+  renderSettings();
+  renderTabs();
+  renderSegments();
+  recalculate();
+}
+
+renderAll();
+
+// Register Service Worker for 100% Offline Support
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').then(() => {
+      document.getElementById('offlineBadge').textContent = 'Автономный режим активен (100% офлайн)';
+    }).catch(() => {});
+  });
+}
 </script>
 </body>
 </html>
